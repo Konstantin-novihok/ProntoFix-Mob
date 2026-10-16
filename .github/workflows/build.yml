@@ -23,13 +23,17 @@ jobs:
               git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config \
               zlib1g-dev libncurses5-dev cmake libffi-dev libssl-dev
           pip install --upgrade pip
-          pip install --upgrade buildozer cython setuptools
+          pip install --upgrade buildozer cython==0.29.33 setuptools
 
       - name: Clean old buildozer cache
         run: |
           rm -rf .buildozer
 
       - name: Build APK with Buildozer
+        env:
+          ANDROID_NDK_ROOT: /home/runner/.buildozer/android/platform/android-ndk-r25b
+          ANDROID_NDK: /home/runner/.buildozer/android/platform/android-ndk-r25b
+          ANDROID_NDK_HOME: /home/runner/.buildozer/android/platform/android-ndk-r25b
         run: |
           buildozer -v android debug
 
