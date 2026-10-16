@@ -9,7 +9,7 @@ source.exclude_dirs = tools,bin,.buildozer,.github
 version = 1.0
 
 # Строго выверенный набор зависимостей без конфликтующих рецептов
-requirements = python3,kivy==2.3.0,requests,urllib3,idna,charset-normalizer,certifi,plyer,pyjnius,android,camera4kivy,gestures4kivy
+requirements = python3,kivy==2.3.0,requests,urllib3,idna,charset-normalizer,certifi,plyer,pyjnius,android
 
 orientation = portrait
 fullscreen = 0
