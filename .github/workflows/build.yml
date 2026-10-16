@@ -11,10 +11,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build with Buildozer Docker
-        uses: snobj/buildozer-action@v1
+      - name: Build with Buildozer
+        uses: kivy/buildozer-action@v1
         with:
-          args: android debug
+          command: buildozer -v android debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
