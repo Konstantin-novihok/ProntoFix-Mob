@@ -30,6 +30,9 @@ jobs:
           rm -rf .buildozer
 
       - name: Build APK with Buildozer
+        env:
+          ANDROID_NDK: /home/runner/.buildozer/android/platform/android-ndk-r25b
+          ANDROID_NDK_HOME: /home/runner/.buildozer/android/platform/android-ndk-r25b
         run: |
           buildozer -v android debug
 
