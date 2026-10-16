@@ -1,0 +1,6 @@
+# Для запуска и отладки клиента на компьютере:  pip install -r requirements-desktop.txt && python main.py
+kivy>=2.3
+kivy-garden.mapview
+plyer
+requests
+# камера на Android: camera4kivy, gestures4kivy (ставятся при сборке APK)
