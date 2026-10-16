@@ -20,7 +20,6 @@ android.permissions = INTERNET,ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CAMER
 android.minapi = 21
 android.api = 33
 android.ndk = 25b
-android.ndk_api = 21
 android.archs = arm64-v8a, armeabi-v7a
 android.accept_sdk_license = True
 # Закреплённая проверенная версия python-for-android (Kivy 2.3.0, NDK 25b, API 33, minapi 21)
