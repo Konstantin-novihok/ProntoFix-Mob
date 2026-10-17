@@ -11,7 +11,7 @@ requirements = python3,kivy==2.3.0,kivy-garden.mapview,requests,urllib3,idna,cha
 
 orientation = portrait
 fullscreen = 0
-android.permissions = INTERNET,ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CAMERA,READ_EXTERNAL_STORAGE
+android.permissions = INTERNET,ACCESS_NETWORK_STATE,ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CAMERA,READ_EXTERNAL_STORAGE
 icon.filename = %(source.dir)s/icon.png
 
 android.api = 33
