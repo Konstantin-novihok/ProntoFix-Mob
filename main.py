@@ -135,7 +135,7 @@ def _install_exception_popup():
 class ServiceApp(App):
     lang = StringProperty("ru")
     tr = ObjectProperty(lambda key: key)       # функция перевода; меняется при смене языка → UI обновляется
-    server_url = StringProperty("https://service.example.com")
+    server_url = StringProperty("http://100.87.176.13:30800")
     me = ObjectProperty(None, allownone=True)  # текущий пользователь (словарь с сервера)
     can_pick_client = BooleanProperty(False)   # владелец/начальник может создать заказ от имени заказчика
 
@@ -158,7 +158,8 @@ class ServiceApp(App):
             self.cfg = json.load(open(self.cfg_path, encoding="utf-8"))
         except Exception:
             pass
-        self.server_url = self.cfg.get("server", self.server_url)
+        self.server_url = self.cfg.get("server", self.server_url).strip().rstrip("/")
+        self.api.base = self.server_url
         self.set_lang(self.cfg.get("lang", "ru"))
         self.new = {}          # черновик нового заказа
         self.reg = {"files": [], "lat": None, "lon": None}   # черновик регистрации
@@ -182,6 +183,8 @@ class ServiceApp(App):
         return sm
 
     def on_start(self):
+        # Use the saved/default server for all API calls from the very start.
+        self.api.base = self.server_url
         try:  # Android 6+: запрос разрешений во время работы
             from android.permissions import Permission, request_permissions
             request_permissions([Permission.ACCESS_FINE_LOCATION, Permission.READ_EXTERNAL_STORAGE,
@@ -218,6 +221,37 @@ class ServiceApp(App):
             json.dump(self.cfg, open(self.cfg_path, "w", encoding="utf-8"))
         except Exception:
             pass
+
+    def change_server(self):
+        """Change the API server from Settings; login and registration screens stay simple."""
+        box = BoxLayout(orientation="vertical", padding=dp(8), spacing=dp(8))
+        field = TextInput(text=self.server_url, multiline=False, hint_text=self.t("server_settings"),
+                          size_hint_y=None, height=dp(48))
+        box.add_widget(field)
+        row = BoxLayout(size_hint_y=None, height=dp(48), spacing=dp(6))
+        save_btn = Factory.Btn(text=self.t("save"))
+        cancel_btn = Factory.Btn(text=self.t("cancel"))
+        row.add_widget(save_btn)
+        row.add_widget(cancel_btn)
+        box.add_widget(row)
+        pop = Popup(title=self.t("server_settings"), content=box, size_hint=(.92, None), height=dp(150))
+        cancel_btn.bind(on_release=pop.dismiss)
+
+        def save_server(*_):
+            value = field.text.strip().rstrip("/")
+            if not value.startswith(("http://", "https://")):
+                return self.error(self.t("server_invalid"))
+            self.server_url = value
+            self.api.base = value
+            self.cfg["server"] = value
+            self.save_cfg()
+            self.map_cfg, self._map_src = {}, None
+            pop.dismiss()
+            self.fetch_map_config()
+            self.load_settings()
+
+        save_btn.bind(on_release=save_server)
+        pop.open()
 
     def pick_language(self):
         self.pick(self.t("language"), [(n, c) for c, n in self.i18n.languages()], self.set_lang)
@@ -292,15 +326,14 @@ class ServiceApp(App):
         getattr(self, "load_" + self.root.current, lambda: None)()
 
     # ----- вход / регистрация -----
-    def login(self, username, password, server):
-        self.server_url = server.strip().rstrip("/")
+    def login(self, username, password):
         self.api.base = self.server_url
         self.cfg["server"] = self.server_url
+        self.save_cfg()
         self.api.post("/auth/login", {"username": username, "password": password}, self.on_auth, self.error)
 
     # ----- регистрация (заказчик) -----
-    def open_register(self, server):
-        self.server_url = server.strip().rstrip("/")
+    def open_register(self):
         self.api.base = self.server_url
         self.go("register")
 
@@ -354,6 +387,8 @@ class ServiceApp(App):
                     address=ids.address.text.strip(), lat=self.reg["lat"], lon=self.reg["lon"],
                     passport_number=ids.pnum.text.strip(), passport_issued=ids.pissued.text.strip(), consent=True)
         self.api.base = self.server_url
+        self.cfg["server"] = self.server_url
+        self.save_cfg()
         self.api.post("/auth/register", body, self.on_registered, self.error)
 
     def on_registered(self, data):
@@ -833,6 +868,7 @@ class ServiceApp(App):
         m = self.me
         self.fill(sc.ids.list, [
             (f"[b]{self.t('profile')}[/b]\n{escape_markup(m['full_name'] or m['username'])} — {self.t(ROLE_KEYS[m['role']])}", None),
+            (f"{self.t('server_settings')}: {escape_markup(self.server_url)}", self.change_server),
             (self.t("language"), self.pick_language),
             (f"{self.t('map_provider')}: {self.t('mp_' + self.cfg['map_provider']) if self.cfg.get('map_provider') else self.t('mp_server')}",
              lambda: self.pick(self.t("map_provider"), [(self.t("mp_server"), None), (self.t("mp_google"), "google"),
