@@ -63,10 +63,6 @@
             size_hint_y: None
             height: dp(70)
         Field:
-            id: server
-            hint_text: app.tr('server_url')
-            text: app.server_url
-        Field:
             id: user
             hint_text: app.tr('username')
         Field:
@@ -75,10 +71,10 @@
             password: True
         Btn:
             text: app.tr('login')
-            on_release: app.login(user.text, pwd.text, server.text)
+            on_release: app.login(user.text, pwd.text)
         Btn:
             text: app.tr('register')
-            on_release: app.open_register(server.text)
+            on_release: app.open_register()
         Btn:
             text: app.tr('language')
             on_release: app.pick_language()
