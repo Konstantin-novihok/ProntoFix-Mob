@@ -7,7 +7,7 @@ source.include_exts = py,kv,json,png,jpg,java
 source.exclude_dirs = tools,bin,.buildozer,.github
 version = 1.0
 
-requirements = python3,kivy==2.3.0,requests,urllib3,idna,charset-normalizer,certifi,plyer,pyjnius,android,camera4kivy,gestures4kivy
+requirements = python3,kivy,kivy-garden,kivy==2.3.0,requests,urllib3,idna,charset-normalizer,certifi,plyer,pyjnius,android,camera4kivy,gestures4kivy
 
 orientation = portrait
 fullscreen = 0
