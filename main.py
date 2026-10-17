@@ -159,6 +159,12 @@ class ServiceApp(App):
         except Exception:
             pass
         self.server_url = self.cfg.get("server", self.server_url).strip().rstrip("/")
+        # Migrate the placeholder URL and accidental /config suffix from older installs.
+        if self.server_url == "https://service.example.com":
+            self.server_url = "http://100.87.176.13:30800"
+        if self.server_url.endswith("/config"):
+            self.server_url = self.server_url[:-7].rstrip("/")
+        self.cfg["server"] = self.server_url
         self.api.base = self.server_url
         self.set_lang(self.cfg.get("lang", "ru"))
         self.new = {}          # черновик нового заказа
@@ -732,7 +738,9 @@ class ServiceApp(App):
         build_source(provider, cfg, done)
 
     def apply_map_source(self, mv, src):
-        mv.cache_dir = src.cache_dir
+        # Keep MapView's standard cache for online sources; override only for offline tiles.
+        if getattr(src, "cache_dir", None):
+            mv.cache_dir = src.cache_dir
         mv.map_source = src
 
     def set_map_provider(self, code):
