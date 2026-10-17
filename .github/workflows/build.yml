@@ -1,0 +1,61 @@
+
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev cmake libffi-dev libssl-dev
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade buildozer cython==0.29.33 setuptools
+
+      - name: Install CameraX provider
+        run: |
+          git clone --depth 1 https://github.com/Android-for-Python/camerax_provider.git camerax_provider
+          rm -rf camerax_provider/.git
+
+      - name: Clean build cache
+        run: rm -rf .buildozer
+
+      - name: Build APK
+        run: buildozer -v android debug 2>&1 | tee build.log
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HomeMaster-apk
+          path: bin/*.apk
+          if-no-files-found: error
